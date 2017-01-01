@@ -2,6 +2,10 @@ class GroupsController < ApplicationController
     before_action :authenticate_user! , only: [:new, :create, :edit, :update, :destroy]
     before_action :find_group_and_check_permission, only: [:edit, :update, :destroy]
 
+  def index
+  @groups = Group.all
+  end
+
   def show
     @group = Group.find(params[:id])
     @posts = @group.posts.recent.paginate(:page => params[:page], :per_page => 5)
@@ -17,9 +21,8 @@ class GroupsController < ApplicationController
   def create
     @group = Group.new(group_params)
     @group.user = current_user
-
     if @group.save
-      current_user.join!(@group)      
+      current_user.join!(@group)
       redirect_to groups_path
     else
       render :new
@@ -36,7 +39,8 @@ class GroupsController < ApplicationController
 
   def destroy
     @group.destroy
-    redirect_to groups_path, alert: "Group deleted"
+    flash[:alert] = "Group deleted"
+    redirect_to groups_path
   end
 
   def join
